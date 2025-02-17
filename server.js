@@ -10,7 +10,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/test", (req, res) => {
-  res.send("success");
+  res.send("test success");
 });
 
 // Запуск сервера
