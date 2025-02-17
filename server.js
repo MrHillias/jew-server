@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+app.use(express.json());
 const PORT = 3000;
 
 //Основная дб
@@ -23,7 +24,6 @@ const HOST = process.env.HOST || "0.0.0.0";
 
 app.post("/user/reg", async (req, res) => {
   try {
-    console.log(`Начат поиск`);
     const { firstname, lastname, fathername, age } = req.body;
     console.log(firstname, lastname, fathername, age);
     const userInfo = await User.create({
@@ -35,6 +35,7 @@ app.post("/user/reg", async (req, res) => {
     await userInfo.save();
     console.log("Юзер добавлен:", userInfo);
   } catch (error) {
+    console.error("Ошибка при создании юзера:", error); // Логирование ошибки
     res.status(500).json({ error: "Ошибка при создании юзера" });
   }
 });
