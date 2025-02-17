@@ -3,7 +3,7 @@ const app = express();
 const PORT = 3000;
 
 // Используйте переменную HOST
-const HOST = process.env.HOST || "localhost";
+const HOST = process.env.HOST || "0.0.0.0";
 
 app.get("/", (req, res) => {
   res.send("success");
