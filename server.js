@@ -47,7 +47,7 @@ app.get("/user/:id", async (req, res) => {
       where: { id: req.params.id },
     });
     if (user) {
-      return res.json(user.firstname, user.lastname, user.fathername, user.age);
+      return res.json(user);
     }
   } catch (error) {
     return res.status(500).json({ error: "Ошибка при поиске пользователя" });
