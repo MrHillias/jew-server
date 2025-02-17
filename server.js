@@ -34,6 +34,7 @@ app.post("/user/reg", async (req, res) => {
     });
     await userInfo.save();
     console.log("Юзер добавлен:", userInfo);
+    return res.send("Пользователь создан");
   } catch (error) {
     console.error("Ошибка при создании юзера:", error); // Логирование ошибки
     res.status(500).json({ error: "Ошибка при создании юзера" });
