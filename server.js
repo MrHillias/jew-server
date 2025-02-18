@@ -1,10 +1,14 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
 const { Client } = require("pg");
 const XLSX = require("xlsx");
 const fs = require("fs");
 app.use(express.json());
 const PORT = 3000;
+
+// Включаем CORS с настройками по умолчанию
+app.use(cors());
 
 //Основная дб
 const sequelize = require("./db");
