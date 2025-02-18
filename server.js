@@ -1,5 +1,8 @@
 const express = require("express");
 const app = express();
+const { Client } = require("pg");
+const XLSX = require("xlsx");
+const fs = require("fs");
 app.use(express.json());
 const PORT = 3000;
 
@@ -21,6 +24,40 @@ sequelize
 
 // Используйте переменную HOST
 const HOST = process.env.HOST || "0.0.0.0";
+
+//скачиванием бд
+app.get("/export", async (req, res) => {
+  try {
+    // Использование Sequelize для получения только нужных данных
+    const users = await User.findAll({
+      attributes: ["firstname", "lastname", "fathername", "age"], // Укажите нужные поля
+    });
+
+    // Преобразование данных в формат, подходящий для xlsx
+    const data = users.map((user) => user.toJSON());
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Users");
+
+    // Запись файла на диск
+    const filePath = "./data.xlsx";
+    XLSX.writeFile(workbook, filePath);
+
+    // Отправка файла клиенту
+    res.download(filePath, "data.xlsx", (err) => {
+      if (err) {
+        console.error("Ошибка при отправке файла:", err);
+        res.status(500).send("Ошибка при отправке файла");
+      }
+
+      // Удаление файла после отправки
+      fs.unlinkSync(filePath);
+    });
+  } catch (error) {
+    console.error("Ошибка при выгрузке данных:", error);
+    res.status(500).send("Ошибка при выгрузке данных");
+  }
+});
 
 app.post("/user/reg", async (req, res) => {
   try {
