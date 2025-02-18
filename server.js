@@ -33,9 +33,17 @@ app.get("/export", async (req, res) => {
       attributes: ["firstname", "lastname", "fathername", "age"], // Укажите нужные поля
     });
 
-    // Преобразование данных в формат, подходящий для xlsx
+    // Преобразование данных в формат JSON
     const data = users.map((user) => user.toJSON());
-    const worksheet = XLSX.utils.json_to_sheet(data);
+    // Создание заголовков
+    const headers = ["Имя", "Фамилия", "Отчество", "Возраст"];
+
+    // Преобразование данных в формат, подходящий для xlsx
+    const worksheetData = [
+      headers,
+      ...data.map((user) => [user.firstname, user.lastname]),
+    ];
+    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Users");
 
