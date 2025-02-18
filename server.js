@@ -41,7 +41,12 @@ app.get("/export", async (req, res) => {
     // Преобразование данных в формат, подходящий для xlsx
     const worksheetData = [
       headers,
-      ...data.map((user) => [user.firstname, user.lastname]),
+      ...data.map((user) => [
+        user.firstname,
+        user.lastname,
+        user.fathername,
+        user.age,
+      ]),
     ];
     const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
     const workbook = XLSX.utils.book_new();
