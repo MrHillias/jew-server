@@ -151,8 +151,6 @@ app.get("/users", async (req, res) => {
 
     // Отправка данных клиенту
     res.json(users);
-
-    return res.send("Данные загружены");
   } catch (error) {
     console.error("Ошибка при получении данных:", error);
     res.status(500).json({ error: "Ошибка при получении данных" });
