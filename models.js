@@ -3,10 +3,24 @@ const { DataTypes } = require("sequelize");
 
 const User = sequelize.define("user", {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  firstname: { type: DataTypes.STRING, allowNull: true },
-  lastname: { type: DataTypes.STRING, allowNull: true },
-  fathername: { type: DataTypes.STRING, allowNull: true },
+  firstName: { type: DataTypes.STRING, allowNull: true },
+  lastName: { type: DataTypes.STRING, allowNull: true },
+  fatherName: { type: DataTypes.STRING, allowNull: true },
   age: { type: DataTypes.INTEGER, allowNull: true, defaultValue: 0 },
+  mobileNumber: { type: DataTypes.INTEGER, allowNull: true, defaultValue: 0 },
+  email: { type: DataTypes.STRING, allowNull: true },
+  gender: { type: DataTypes.STRING, allowNull: true },
+  address: {
+    type: DataTypes.JSON,
+    allowNull: true,
+    defaultValue: {
+      city: null,
+      street: null,
+      houseNumber: null,
+      building: null,
+      apartment: null,
+    },
+  },
 });
 
 module.exports = User;

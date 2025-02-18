@@ -34,22 +34,45 @@ app.get("/export", async (req, res) => {
   try {
     // Использование Sequelize для получения только нужных данных
     const users = await User.findAll({
-      attributes: ["firstname", "lastname", "fathername", "age"], // Укажите нужные поля
+      attributes: [
+        "firstName",
+        "lastName",
+        "fatherName",
+        "age",
+        "mobileNumber",
+        "email",
+        "gender",
+        "address",
+      ], // Укажите нужные поля
     });
 
     // Преобразование данных в формат JSON
     const data = users.map((user) => user.toJSON());
+
     // Создание заголовков
-    const headers = ["Имя", "Фамилия", "Отчество", "Возраст"];
+    const headers = [
+      "Имя",
+      "Фамилия",
+      "Отчество",
+      "Возраст",
+      "Мобильный номер",
+      "email",
+      "Пол",
+      "Адрес",
+    ];
 
     // Преобразование данных в формат, подходящий для xlsx
     const worksheetData = [
       headers,
       ...data.map((user) => [
-        user.firstname,
-        user.lastname,
-        user.fathername,
+        user.firstName,
+        user.lastName,
+        user.fatherName,
         user.age,
+        user.mobileNumber,
+        user.email,
+        user.gender,
+        user.address,
       ]),
     ];
     const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
@@ -80,13 +103,26 @@ app.get("/export", async (req, res) => {
 // API для занесения нового пользователя
 app.post("/user/reg", async (req, res) => {
   try {
-    const { firstname, lastname, fathername, age } = req.body;
-    console.log(firstname, lastname, fathername, age);
+    const {
+      firstName,
+      lastName,
+      fatherName,
+      age,
+      mobileNumber,
+      email,
+      gender,
+      address,
+    } = req.body;
+    console.log(firstName, lastName, fatherName, age);
     const userInfo = await User.create({
-      firstname: firstname,
-      lastname: lastname,
-      fathername: fathername,
+      firstName: firstName,
+      lastName: lastName,
+      fatherName: fatherName,
       age: age,
+      mobileNumber: mobileNumber,
+      email: email,
+      gender: gender,
+      address: address,
     });
     await userInfo.save();
     console.log("Юзер добавлен:", userInfo);
@@ -101,7 +137,16 @@ app.post("/user/reg", async (req, res) => {
 app.get("/users", async (req, res) => {
   try {
     const users = await User.findAll({
-      attributes: ["firstname", "lastname", "fathername", "age"], // Указываем нужные поля
+      attributes: [
+        "firstName",
+        "lastName",
+        "fatherName",
+        "age",
+        "mobileNumber",
+        "email",
+        "gender",
+        "address",
+      ], // Указываем нужные поля
     });
 
     // Отправка данных клиенту
@@ -119,7 +164,16 @@ app.get("/user/:id", async (req, res) => {
   try {
     const user = await User.findOne({
       where: { id: req.params.id },
-      attributes: ["firstname", "lastname", "fathername", "age"], // Указываем нужные поля
+      attributes: [
+        "firstName",
+        "lastName",
+        "fatherName",
+        "age",
+        "mobileNumber",
+        "email",
+        "gender",
+        "address",
+      ], // Указываем нужные поля
     });
     if (user) {
       return res.json(user);
