@@ -66,6 +66,7 @@ app.get("/export", async (req, res) => {
       // Удаление файла после отправки
       fs.unlinkSync(filePath);
     });
+    return res.send("Отправка совершена");
   } catch (error) {
     console.error("Ошибка при выгрузке данных:", error);
     res.status(500).send("Ошибка при выгрузке данных");
@@ -88,6 +89,24 @@ app.post("/user/reg", async (req, res) => {
   } catch (error) {
     console.error("Ошибка при создании юзера:", error); // Логирование ошибки
     res.status(500).json({ error: "Ошибка при создании юзера" });
+  }
+});
+
+// API для получения всех строк по выбранным колонкам
+app.get("/users", async (req, res) => {
+  try {
+    // Укажите нужные поля
+    const users = await User.findAll({
+      attributes: ["firstname", "lastname", "fathername", "age"], // Замените на нужные поля
+    });
+
+    // Отправка данных клиенту
+    res.json(users);
+
+    return res.send("Данные загружены");
+  } catch (error) {
+    console.error("Ошибка при получении данных:", error);
+    res.status(500).json({ error: "Ошибка при получении данных" });
   }
 });
 
