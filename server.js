@@ -38,12 +38,12 @@ app.get("/export", async (req, res) => {
         "firstName",
         "lastName",
         "fatherName",
-        "age",
+        "birthDate",
         "mobileNumber",
         "email",
         "gender",
         "address",
-      ], // Укажите нужные поля
+      ],
     });
 
     // Преобразование данных в формат JSON
@@ -68,11 +68,11 @@ app.get("/export", async (req, res) => {
         user.firstName,
         user.lastName,
         user.fatherName,
-        user.age,
+        user.birthDate,
         user.mobileNumber,
         user.email,
         user.gender,
-        user.address,
+        JSON.stringify(user.address), // Преобразуем объект address в строку
       ]),
     ];
     const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
@@ -87,13 +87,16 @@ app.get("/export", async (req, res) => {
     res.download(filePath, "data.xlsx", (err) => {
       if (err) {
         console.error("Ошибка при отправке файла:", err);
-        res.status(500).send("Ошибка при отправке файла");
+        return res.status(500).send("Ошибка при отправке файла");
       }
 
       // Удаление файла после отправки
-      fs.unlinkSync(filePath);
+      fs.unlink(filePath, (unlinkErr) => {
+        if (unlinkErr) {
+          console.error("Ошибка при удалении файла:", unlinkErr);
+        }
+      });
     });
-    return res.send("Отправка совершена");
   } catch (error) {
     console.error("Ошибка при выгрузке данных:", error);
     res.status(500).send("Ошибка при выгрузке данных");
@@ -107,18 +110,18 @@ app.post("/user/reg", async (req, res) => {
       firstName,
       lastName,
       fatherName,
-      age,
+      birthDate,
       mobileNumber,
       email,
       gender,
       address,
     } = req.body;
-    console.log(firstName, lastName, fatherName, age);
+    console.log(firstName, lastName, fatherName, birthDate);
     const userInfo = await User.create({
       firstName: firstName,
       lastName: lastName,
       fatherName: fatherName,
-      age: age,
+      birthDate: birthDate,
       mobileNumber: mobileNumber,
       email: email,
       gender: gender,
@@ -141,7 +144,7 @@ app.get("/users", async (req, res) => {
         "firstName",
         "lastName",
         "fatherName",
-        "age",
+        "birthDate",
         "mobileNumber",
         "email",
         "gender",
@@ -166,7 +169,7 @@ app.get("/user/:id", async (req, res) => {
         "firstName",
         "lastName",
         "fatherName",
-        "age",
+        "birthDate",
         "mobileNumber",
         "email",
         "gender",
