@@ -19,6 +19,7 @@ const User = sequelize.define("user", {
       houseNumber: null,
       building: null,
       apartment: null,
+      metroStation: null,
     },
   },
 });
