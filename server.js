@@ -10,6 +10,15 @@ const PORT = 3000;
 // Включаем CORS с настройками по умолчанию
 app.use(cors());
 
+// Настройка CORS
+const corsOptions = {
+  origin: "http://geula-list.ru", // Замените на домен вашего фронтенда
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
+
 //Основная дб
 const sequelize = require("./db");
 const User = require("./models");
