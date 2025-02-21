@@ -199,6 +199,7 @@ app.get("/user/:id", async (req, res) => {
   }
 });
 
+// API для изменения инфы по отдельному пользователю
 app.put("/user/:id", async (req, res) => {
   try {
     const userId = req.params.id; // Получаем id из параметров URL
@@ -239,6 +240,29 @@ app.put("/user/:id", async (req, res) => {
   } catch (error) {
     console.error("Ошибка при обновлении пользователя:", error);
     res.status(500).json({ error: "Ошибка при обновлении пользователя" });
+  }
+});
+
+// API для удаления пользователя
+app.delete("/user/:id", async (req, res) => {
+  try {
+    const userId = req.params.id; // Получаем id из параметров URL
+
+    // Найдите пользователя по id
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "Пользователь не найден" });
+    }
+
+    // Удалите пользователя
+    await user.destroy();
+
+    // Отправьте подтверждение удаления
+    res.json({ message: "Пользователь успешно удален" });
+  } catch (error) {
+    console.error("Ошибка при удалении пользователя:", error);
+    res.status(500).json({ error: "Ошибка при удалении пользователя" });
   }
 });
 
