@@ -179,6 +179,7 @@ app.get("/user/:id", async (req, res) => {
     const user = await User.findOne({
       where: { id: req.params.id },
       attributes: [
+        "id",
         "firstName",
         "lastName",
         "fatherName",
