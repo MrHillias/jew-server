@@ -115,6 +115,7 @@ app.post("/user/reg", async (req, res) => {
       email,
       gender,
       address,
+      religiousInfo,
     } = req.body;
     console.log(firstName, lastName, fatherName, birthDate);
     const userInfo = await User.create({
@@ -126,6 +127,7 @@ app.post("/user/reg", async (req, res) => {
       email: email,
       gender: gender,
       address: address,
+      religiousInfo: religiousInfo,
     });
     await userInfo.save();
     console.log("Юзер добавлен:", userInfo);
@@ -141,6 +143,7 @@ app.get("/users", async (req, res) => {
   try {
     const users = await User.findAll({
       attributes: [
+        "id",
         "firstName",
         "lastName",
         "fatherName",
@@ -149,6 +152,7 @@ app.get("/users", async (req, res) => {
         "email",
         "gender",
         "address",
+        "religiousInfo",
       ], // Указываем нужные поля
     });
 
@@ -174,6 +178,7 @@ app.get("/user/:id", async (req, res) => {
         "email",
         "gender",
         "address",
+        "religiousInfo",
       ], // Указываем нужные поля
     });
     if (user) {

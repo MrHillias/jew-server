@@ -22,6 +22,20 @@ const User = sequelize.define("user", {
       metroStation: null,
     },
   },
+  religiousInfo: {
+    type: DataTypes.JSON,
+    allowNull: true,
+    defaultValue: {
+      keepsSabbath: false,
+      keepsKosher: false,
+      hasTT: false,
+      seminarParticipant: false,
+      hasCommunityBooks: false,
+      childrenCamp: false,
+      passover: false,
+      isInNeed: false,
+    },
+  },
 });
 
 module.exports = User;
