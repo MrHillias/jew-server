@@ -199,6 +199,49 @@ app.get("/user/:id", async (req, res) => {
   }
 });
 
+app.put("/user/:id", async (req, res) => {
+  try {
+    const userId = req.params.id; // Получаем id из параметров URL
+    const {
+      firstName,
+      lastName,
+      fatherName,
+      age,
+      mobileNumber,
+      email,
+      gender,
+      address,
+      religiousInfo,
+    } = req.body; // Получаем данные для обновления из тела запроса
+
+    // Найдите пользователя по id
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "Пользователь не найден" });
+    }
+
+    // Обновите данные пользователя
+    await user.update({
+      firstName: firstName,
+      lastName: lastName,
+      fatherName: fatherName,
+      birthDate: birthDate,
+      mobileNumber: mobileNumber,
+      email: email,
+      gender: gender,
+      address: address,
+      religiousInfo: religiousInfo,
+    });
+
+    // Отправьте обновленные данные пользователя в ответе
+    res.json(user);
+  } catch (error) {
+    console.error("Ошибка при обновлении пользователя:", error);
+    res.status(500).json({ error: "Ошибка при обновлении пользователя" });
+  }
+});
+
 //Фановые API, чтобы убедиться, что все раб отает
 app.get("/", (req, res) => {
   res.send("success");
