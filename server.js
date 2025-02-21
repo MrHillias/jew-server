@@ -206,7 +206,7 @@ app.put("/user/:id", async (req, res) => {
       firstName,
       lastName,
       fatherName,
-      age,
+      birthDate,
       mobileNumber,
       email,
       gender,
