@@ -3,6 +3,7 @@ const app = express();
 const cors = require("cors");
 const { Client } = require("pg");
 const XLSX = require("xlsx");
+const ExcelJS = require("exceljs");
 const fs = require("fs");
 app.use(express.json());
 const PORT = 3000;
@@ -37,6 +38,115 @@ sequelize
 
 // Используйте переменную HOST
 const HOST = process.env.HOST || "0.0.0.0";
+
+// API для скачивания бд по выбранным пользователям
+app.post("/export", async (req, res) => {
+  try {
+    const ids = req.body.ids; // Получаем массив id из тела запроса
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res
+        .status(400)
+        .json({ error: "Необходимо предоставить массив id" });
+    }
+
+    // Получаем пользователей по переданным id
+    const users = await User.findAll({
+      where: {
+        id: ids,
+      },
+    });
+
+    if (users.length === 0) {
+      return res.status(404).json({ error: "Пользователи не найдены" });
+    }
+
+    // Создаем новый Excel-файл
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Users");
+
+    // Добавляем заголовки
+    worksheet.columns = [
+      { header: "Фамилия", key: "lastName", width: 30 },
+      { header: "Имя", key: "firstName", width: 30 },
+      { header: "Отчество", key: "fatherName", width: 30 },
+      { header: "Возраст", key: "age", width: 10 },
+      { header: "Мобильный номер", key: "mobileNumber", width: 15 },
+      { header: "Email", key: "email", width: 30 },
+      { header: "Пол", key: "gender", width: 10 },
+      { header: "Город", key: "city", width: 30 },
+      { header: "Улица", key: "street", width: 30 },
+      { header: "Номер дома", key: "houseNumber", width: 15 },
+      { header: "Корпус", key: "building", width: 15 },
+      { header: "Квартира", key: "apartment", width: 15 },
+      { header: "Станция метро", key: "metroStation", width: 15 },
+    ];
+
+    // Сортируем пользователей по lastName
+    users.sort((a, b) => {
+      const lastNameA = a.lastName.toLowerCase(); // Приводим к нижнему регистру для корректной сортировки
+      const lastNameB = b.lastName.toLowerCase();
+      if (lastNameA < lastNameB) return -1;
+      if (lastNameA > lastNameB) return 1;
+      return 0;
+    });
+
+    // Добавляем данные пользователей в Excel
+    users.forEach((user) => {
+      const addresses = user.address; // Предполагаем, что address - это массив объектов
+      if (Array.isArray(addresses) && addresses.length > 0) {
+        addresses.forEach((address) => {
+          worksheet.addRow({
+            lastName: user.lastName,
+            firstName: user.firstName,
+            fatherName: user.fatherName,
+            age: user.age,
+            mobileNumber: user.mobileNumber,
+            email: user.email,
+            gender: user.gender,
+            city: address.city || "",
+            street: address.street || "",
+            houseNumber: address.houseNumber || "",
+            building: address.building || "",
+            apartment: address.apartment || "",
+            metroStation: address.metroStation || "",
+          });
+        });
+      } else {
+        // Если адресов нет, добавляем строку с пустыми значениями
+        worksheet.addRow({
+          lastName: user.lastName,
+          firstName: user.firstName,
+          fatherName: user.fatherName,
+          age: user.age,
+          mobileNumber: user.mobileNumber,
+          email: user.email,
+          gender: user.gender,
+          city: "",
+          street: "",
+          houseNumber: "",
+          building: "",
+          apartment: "",
+          metroStation: "",
+        });
+      }
+    });
+
+    // Устанавливаем заголовки для скачивания файла
+    res.setHeader("Content-Disposition", "attachment; filename=users.xlsx");
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+
+    // Записываем файл в ответ
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (error) {
+    console.error("Ошибка при выгрузке данных:", error);
+    res.status(500).json({ error: "Ошибка при выгрузке данных" });
+  }
+});
 
 // API для скачивания бд
 app.get("/export", async (req, res) => {
@@ -131,7 +241,7 @@ app.post("/user/reg", async (req, res) => {
       firstName: firstName,
       lastName: lastName,
       fatherName: fatherName,
-      birthDate: birthDate,
+      birthDate: birthDate || null,
       mobileNumber: mobileNumber,
       email: email,
       gender: gender,
