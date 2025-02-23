@@ -16,7 +16,7 @@ app.use(cors());
 
 // Настройка CORS
 const corsOptions = {
-  origin: "http://geula-list.ru", // Замените на домен вашего фронтенда
+  origin: "http://geula-list.ru",
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   optionsSuccessStatus: 204,
 };
