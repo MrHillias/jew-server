@@ -109,7 +109,7 @@ router.put("/user/:id", async (req, res) => {
 });
 
 // API для удаления пользователя
-app.delete("/user/:id", async (req, res) => {
+router.delete("/user/:id", async (req, res) => {
   try {
     const userId = req.params.id; // Получаем id из параметров URL
 
