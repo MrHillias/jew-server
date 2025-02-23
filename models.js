@@ -9,6 +9,7 @@ const User = sequelize.define(
     lastName: { type: DataTypes.STRING, allowNull: true },
     fatherName: { type: DataTypes.STRING, allowNull: true },
     birthDate: { type: DataTypes.DATE, allowNull: true },
+    hebrewDate: { type: DataTypes.STRING, allowNull: true },
     mobileNumber: { type: DataTypes.INTEGER, allowNull: true, defaultValue: 0 },
     email: { type: DataTypes.STRING, allowNull: true },
     gender: { type: DataTypes.STRING, allowNull: true },

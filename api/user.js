@@ -1,5 +1,6 @@
 const express = require("express");
 const User = require("../models");
+const Hebcal = require("hebcal");
 
 const router = express.Router();
 
@@ -18,11 +19,18 @@ router.post("/user/reg", async (req, res) => {
       religiousInfo,
     } = req.body;
     console.log(firstName, lastName, fatherName, birthDate);
+
+    // Преобразование даты рождения в еврейскую дату
+    const date = new Date(birthDate);
+    const hebrewDate = new Hebcal.HDate(date);
+    const hebrewDateString = hebrewDate.toString(); // Преобразование в строку
+
     const userInfo = await User.create({
       firstName: firstName,
       lastName: lastName,
       fatherName: fatherName,
       birthDate: birthDate || null,
+      hebrewDate: hebrewDateString || null,
       mobileNumber: mobileNumber,
       email: email,
       gender: gender,
