@@ -6,6 +6,7 @@ const router = express.Router();
 // API для получения всех строк по выбранным колонкам
 router.get("/users", async (req, res) => {
   try {
+    console.log(User);
     const users = await User.findAll({
       attributes: [
         "id",
