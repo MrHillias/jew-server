@@ -1,5 +1,5 @@
 const express = require("express");
-const { User } = require("../models");
+const User = require("../models");
 
 const router = express.Router();
 
@@ -60,6 +60,7 @@ router.get("/user/:id", async (req, res) => {
       return res.json(user);
     }
   } catch (error) {
+    console.error("Ошибка при получении данных:", error);
     return res.status(500).json({ error: "Ошибка при поиске пользователя" });
   }
 });

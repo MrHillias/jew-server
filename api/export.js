@@ -1,5 +1,5 @@
 const express = require("express");
-const { User } = require("../models");
+const User = require("../models");
 const ExcelJS = require("exceljs");
 const XLSX = require("xlsx");
 
