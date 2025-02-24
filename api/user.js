@@ -27,7 +27,7 @@ router.post("/user/reg", async (req, res) => {
     const hebrewDate = new Hebcal.HDate(date);
     const hebrewDateString = hebrewDate.toString(); // Преобразование в строку
 
-    const age = calculateAge();
+    const age = calculateAge(birthDate);
 
     const userInfo = await User.create({
       firstName: firstName,
