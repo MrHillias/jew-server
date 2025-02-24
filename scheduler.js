@@ -1,6 +1,6 @@
 const cron = require("node-cron");
 const express = require("express");
-const User = require("../models");
+const User = require("./models");
 
 // Функция для настройки планировщика
 function setupScheduler() {
