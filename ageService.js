@@ -1,4 +1,4 @@
-const { User } = require("./models"); // Импорт модели User
+const User = require("./models"); // Импорт модели User
 const calculateAge = require("./ageCalculator"); // Импорт функции calculateAge
 
 async function recalculateAges() {
