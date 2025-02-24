@@ -6,7 +6,7 @@ const router = express.Router();
 // GET-метод для получения всех уведомлений
 router.get("/", async (req, res) => {
   try {
-    const notifications = await Notification.findAll();
+    const notifications = await Notifications.findAll();
     res.json(notifications);
   } catch (error) {
     console.error("Ошибка при получении уведомлений:", error);
@@ -18,7 +18,7 @@ router.get("/", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const notification = await Notification.findByPk(id);
+    const notification = await Notifications.findByPk(id);
     if (!notification) {
       return res.status(404).json({ error: "Уведомление не найдено" });
     }
