@@ -12,6 +12,7 @@ const userRoutes = require("./api/user");
 const usersRoutes = require("./api/users");
 
 // Настройка планировщика
+const setupScheduler = require("./scheduler");
 setupScheduler();
 
 // Включаем CORS с настройками по умолчанию
