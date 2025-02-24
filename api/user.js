@@ -4,7 +4,7 @@ const Hebcal = require("hebcal");
 
 const router = express.Router();
 
-const calculateAge = require("./ageCalculator");
+const calculateAge = require("../ageCalculator");
 
 // API для занесения нового пользователя
 router.post("/user/reg", async (req, res) => {
