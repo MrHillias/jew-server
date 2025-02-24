@@ -1,6 +1,5 @@
 const cron = require("node-cron");
-const express = require("express");
-const User = require("./models");
+const { checkUpcomingBarMitzvahs } = require("./notificationService");
 
 // Функция для настройки планировщика
 function setupScheduler() {
@@ -10,6 +9,7 @@ function setupScheduler() {
   //* — день недели (каждый день недели)
   cron.schedule("0 10 * * *", () => {
     console.log("Запуск проверки базы данных в полночь");
+    checkUpcomingBarMitzvahs();
   });
 }
 
