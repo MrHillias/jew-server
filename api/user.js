@@ -25,12 +25,29 @@ router.post("/user/reg", async (req, res) => {
     const hebrewDate = new Hebcal.HDate(date);
     const hebrewDateString = hebrewDate.toString(); // Преобразование в строку
 
+    const today = new Date();
+    const birth = new Date(birthDate);
+
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDifference = today.getMonth() - birth.getMonth();
+
+    // Если текущий месяц меньше месяца рождения или
+    // текущий месяц равен месяцу рождения, но текущий день меньше дня рождения,
+    // то уменьшаем возраст на 1
+    if (
+      monthDifference < 0 ||
+      (monthDifference === 0 && today.getDate() < birth.getDate())
+    ) {
+      age--;
+    }
+
     const userInfo = await User.create({
       firstName: firstName,
       lastName: lastName,
       fatherName: fatherName,
       birthDate: birthDate || null,
       hebrewDate: hebrewDateString || null,
+      age: age,
       mobileNumber: mobileNumber,
       email: email,
       gender: gender,
@@ -58,6 +75,7 @@ router.get("/user/:id", async (req, res) => {
         "fatherName",
         "birthDate",
         "hebrewDate",
+        "age",
         "mobileNumber",
         "email",
         "gender",

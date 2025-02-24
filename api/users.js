@@ -14,6 +14,7 @@ router.get("/users", async (req, res) => {
         "fatherName",
         "birthDate",
         "hebrewDate",
+        "age",
         "mobileNumber",
         "email",
         "gender",
