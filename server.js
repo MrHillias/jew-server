@@ -35,6 +35,9 @@ app.use("/", exportRoutes);
 //Основная дб
 const sequelize = require("./db");
 
+//Основная дб
+const sequelize_notifications = require("./db_notifications");
+
 // Проверка соединения с БД
 sequelize
   .authenticate()
@@ -43,8 +46,20 @@ sequelize
 
 // Синхронизация таблиц
 sequelize
-  .sync() // Используйте эту строку, чтобы убедиться, что таблицы созданы
+  .sync()
   .then(() => console.log("Основные таблицы синхронизированы"))
+  .catch((err) => console.error("Ошибка синхронизации:", err));
+
+// Проверка соединения с БД уведомлений
+sequelize_notifications
+  .authenticate()
+  .then(() => console.log("Соединение с базой данных уведомлений установлено"))
+  .catch((err) => console.error("Невозможно подключиться к базе данных:", err));
+
+// Синхронизация таблиц
+sequelize_notifications
+  .sync()
+  .then(() => console.log("Основные таблицы уведомлений синхронизированы"))
   .catch((err) => console.error("Ошибка синхронизации:", err));
 
 // Используйте переменную HOST
