@@ -3,7 +3,7 @@ const router = express.Router();
 const Hebcal = require("hebcal");
 
 // API для получения григорианской и еврейской дат
-router.get("/dates", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     // Получение сегодняшней григорианской даты
     const todayGregorian = new Date();
