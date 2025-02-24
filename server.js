@@ -11,6 +11,7 @@ const exportRoutes = require("./api/export");
 const userRoutes = require("./api/user");
 const usersRoutes = require("./api/users");
 const notificationsRouter = require("./api/notifications");
+const datesRouter = require("./api/date");
 
 // Настройка планировщика
 const setupScheduler = require("./scheduler");
@@ -33,6 +34,7 @@ app.use("/", userRoutes);
 app.use("/", usersRoutes);
 app.use("/", exportRoutes);
 app.use("/api/notifications", notificationsRouter);
+app.use("/api/dates", datesRouter);
 
 //Основная дб
 const sequelize = require("./db");
