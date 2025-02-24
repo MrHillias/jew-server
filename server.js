@@ -10,6 +10,7 @@ const PORT = 3000;
 const exportRoutes = require("./api/export");
 const userRoutes = require("./api/user");
 const usersRoutes = require("./api/users");
+const notificationsRouter = require("./api/notifications");
 
 // Настройка планировщика
 const setupScheduler = require("./scheduler");
@@ -31,6 +32,7 @@ app.use(cors(corsOptions));
 app.use("/", userRoutes);
 app.use("/", usersRoutes);
 app.use("/", exportRoutes);
+app.use("/api/notifications", notificationsRouter);
 
 //Основная дб
 const sequelize = require("./db");

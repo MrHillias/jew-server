@@ -10,27 +10,50 @@ async function checkUpcomingBarMitzvahs() {
     const today = new Date();
     const hebrewToday = new Hebcal.HDate(today);
 
-    // Прибавление 180 дней
-    hebrewToday.setDate(hebrewToday.getDate() + 180);
+    // Вычисление целевых дат для бар-мицвы, бат-мицвы и халаке
+    const barMitzvahDate = new Hebcal.HDate(hebrewToday);
+    barMitzvahDate.setDate(barMitzvahDate.getDate() + 180);
+    barMitzvahDate.setFullYear(barMitzvahDate.getFullYear() - 13);
 
-    // Вычитание 13 лет
-    hebrewToday.setFullYear(hebrewToday.getFullYear() - 13);
+    const batMitzvahDate = new Hebcal.HDate(hebrewToday);
+    batMitzvahDate.setDate(batMitzvahDate.getDate() + 180);
+    batMitzvahDate.setFullYear(batMitzvahDate.getFullYear() - 12);
 
-    // Преобразование в строку
-    const targetHebrewDateString = hebrewToday.toString();
+    const halakeDate = new Hebcal.HDate(hebrewToday);
+    halakeDate.setDate(halakeDate.getDate() + 14);
+    halakeDate.setFullYear(halakeDate.getFullYear() - 3);
 
-    console.log("Мы ищем людей с др " + targetHebrewDateString);
+    // Преобразование дат в строки
+    const barMitzvahDateString = barMitzvahDate.toString();
+    const batMitzvahDateString = batMitzvahDate.toString();
+    const halakeDateString = halakeDate.toString();
 
-    // Поиск пользователей с совпадающей еврейской датой
-    const users = await User.findAll({
+    // Поиск пользователей для бар-мицвы
+    const barMitzvahUsers = await User.findAll({
       where: {
-        hebrewDate: targetHebrewDateString,
+        hebrewDate: barMitzvahDateString,
+        gender: "М",
+      },
+    });
+
+    // Поиск пользователей для бат-мицвы
+    const batMitzvahUsers = await User.findAll({
+      where: {
+        hebrewDate: batMitzvahDateString,
+        gender: "Ж",
+      },
+    });
+
+    // Поиск пользователей для халаке
+    const halakeUsers = await User.findAll({
+      where: {
+        hebrewDate: halakeDateString,
       },
     });
 
     // Создание оповещений для каждого пользователя
-    for (const user of users) {
-      await Notifications.create({
+    for (const user of barMitzvahUsers) {
+      await Notification.create({
         userId: user.id,
         message: `Бар-мицва через 180 дней!`,
         type: "bar-mitzvah",
@@ -38,7 +61,29 @@ async function checkUpcomingBarMitzvahs() {
       });
     }
 
-    console.log(`Создано ${users.length} оповещений о бар-мицве.`);
+    for (const user of batMitzvahUsers) {
+      await Notification.create({
+        userId: user.id,
+        message: `Бат-мицва через 180 дней!`,
+        type: "bat-mitzvah",
+        status: "unread",
+      });
+    }
+
+    for (const user of halakeUsers) {
+      await Notification.create({
+        userId: user.id,
+        message: `Халаке через 2 недели!`,
+        type: "halake",
+        status: "unread",
+      });
+    }
+
+    console.log(
+      `Создано ${
+        barMitzvahUsers.length + batMitzvahUsers.length + halakeUsers.length
+      } оповещений о предстоящих празднованиях.`
+    );
   } catch (error) {
     console.error("Ошибка при проверке бар-мицв:", error);
   }
