@@ -19,6 +19,8 @@ async function checkUpcomingBarMitzvahs() {
     // Преобразование в строку
     const targetHebrewDateString = hebrewToday.toString();
 
+    console.log("Мы ищем людей с др " + targetHebrewDateString);
+
     // Поиск пользователей с совпадающей еврейской датой
     const users = await User.findAll({
       where: {
