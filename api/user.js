@@ -83,7 +83,6 @@ router.put("/user/:id", async (req, res) => {
       lastName,
       fatherName,
       birthDate,
-      hebrewDate,
       mobileNumber,
       email,
       gender,
@@ -98,13 +97,18 @@ router.put("/user/:id", async (req, res) => {
       return res.status(404).json({ error: "Пользователь не найден" });
     }
 
+    // Преобразование даты рождения в еврейскую дату
+    const date = new Date(birthDate);
+    const hebrewDate = new Hebcal.HDate(date);
+    const hebrewDateString = hebrewDate.toString(); // Преобразование в строку
+
     // Обновите данные пользователя
     await user.update({
       firstName: firstName,
       lastName: lastName,
       fatherName: fatherName,
       birthDate: birthDate,
-      hebrewDate: hebrewDate,
+      hebrewDate: hebrewDateString,
       mobileNumber: mobileNumber,
       email: email,
       gender: gender,
