@@ -1,26 +1,34 @@
 const User = require("./models");
 const Notifications = require("./models_notification");
+const Hebcal = require("hebcal");
 
 const { Op } = require("sequelize");
 
 async function checkUpcomingBarMitzvahs() {
   try {
+    // Получение сегодняшней даты и преобразование в еврейскую дату
     const today = new Date();
-    const targetDate = new Date(today);
-    targetDate.setDate(today.getDate() + 180);
+    const hebrewToday = new Hebcal.HDate(today);
 
-    // Поиск пользователей, у которых бар-мицва через 180 дней
+    // Прибавление 180 дней
+    hebrewToday.setDate(hebrewToday.getDate() + 180);
+
+    // Вычитание 13 лет
+    hebrewToday.setFullYear(hebrewToday.getFullYear() - 13);
+
+    // Преобразование в строку
+    const targetHebrewDateString = hebrewToday.toString();
+
+    // Поиск пользователей с совпадающей еврейской датой
     const users = await User.findAll({
       where: {
-        barMitzvahDate: {
-          [Op.eq]: targetDate,
-        },
+        hebrewDate: targetHebrewDateString,
       },
     });
 
     // Создание оповещений для каждого пользователя
     for (const user of users) {
-      await Notifications.create({
+      await Notification.create({
         userId: user.id,
         message: `Бар-мицва через 180 дней!`,
         type: "bar-mitzvah",
