@@ -11,6 +11,9 @@ const exportRoutes = require("./api/export");
 const userRoutes = require("./api/user");
 const usersRoutes = require("./api/users");
 
+// Настройка планировщика
+setupScheduler();
+
 // Включаем CORS с настройками по умолчанию
 app.use(cors());
 
