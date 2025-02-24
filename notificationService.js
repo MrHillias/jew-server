@@ -30,7 +30,7 @@ async function checkUpcomingBarMitzvahs() {
 
     // Создание оповещений для каждого пользователя
     for (const user of users) {
-      await Notification.create({
+      await Notifications.create({
         userId: user.id,
         message: `Бар-мицва через 180 дней!`,
         type: "bar-mitzvah",
