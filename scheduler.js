@@ -1,5 +1,6 @@
 const cron = require("node-cron");
 const { checkUpcomingBarMitzvahs } = require("./notificationService");
+const { recalculateAges } = require("./ageService");
 
 // Функция для настройки планировщика
 function setupScheduler() {
@@ -10,6 +11,7 @@ function setupScheduler() {
   cron.schedule("56 11 * * *", () => {
     console.log("Запуск проверки базы данных по бар-мицве");
     checkUpcomingBarMitzvahs();
+    recalculateAges();
   });
 }
 

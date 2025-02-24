@@ -4,6 +4,8 @@ const Hebcal = require("hebcal");
 
 const router = express.Router();
 
+const calculateAge = require("./ageCalculator");
+
 // API для занесения нового пользователя
 router.post("/user/reg", async (req, res) => {
   try {
@@ -25,21 +27,7 @@ router.post("/user/reg", async (req, res) => {
     const hebrewDate = new Hebcal.HDate(date);
     const hebrewDateString = hebrewDate.toString(); // Преобразование в строку
 
-    const today = new Date();
-    const birth = new Date(birthDate);
-
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDifference = today.getMonth() - birth.getMonth();
-
-    // Если текущий месяц меньше месяца рождения или
-    // текущий месяц равен месяцу рождения, но текущий день меньше дня рождения,
-    // то уменьшаем возраст на 1
-    if (
-      monthDifference < 0 ||
-      (monthDifference === 0 && today.getDate() < birth.getDate())
-    ) {
-      age--;
-    }
+    const age = calculateAge();
 
     const userInfo = await User.create({
       firstName: firstName,
