@@ -1,4 +1,4 @@
-const sequelize = require("./db");
+const sequelize = require("./db_notifications");
 const { Sequelize, DataTypes } = require("sequelize");
 
 const Notifications = sequelize.define(
