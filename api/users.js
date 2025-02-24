@@ -13,6 +13,7 @@ router.get("/users", async (req, res) => {
         "lastName",
         "fatherName",
         "birthDate",
+        "hebrewDate",
         "mobileNumber",
         "email",
         "gender",
