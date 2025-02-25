@@ -53,8 +53,10 @@ async function checkUpcomingBarMitzvahs() {
 
     // Создание оповещений для каждого пользователя
     for (const user of barMitzvahUsers) {
-      await Notification.create({
+      await Notifications.create({
         userId: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
         message: `Бар-мицва через 180 дней!`,
         type: "bar-mitzvah",
         status: "unread",
@@ -62,8 +64,10 @@ async function checkUpcomingBarMitzvahs() {
     }
 
     for (const user of batMitzvahUsers) {
-      await Notification.create({
+      await Notifications.create({
         userId: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
         message: `Бат-мицва через 180 дней!`,
         type: "bat-mitzvah",
         status: "unread",
@@ -71,8 +75,10 @@ async function checkUpcomingBarMitzvahs() {
     }
 
     for (const user of halakeUsers) {
-      await Notification.create({
+      await Notifications.create({
         userId: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
         message: `Халаке через 2 недели!`,
         type: "halake",
         status: "unread",

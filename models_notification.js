@@ -7,6 +7,8 @@ const Notifications = sequelize.define(
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     userId: { type: DataTypes.INTEGER, allowNull: false },
     message: { type: DataTypes.STRING, allowNull: false },
+    firstName: { type: DataTypes.STRING, allowNull: false },
+    secondName: { type: DataTypes.STRING, allowNull: false },
     type: { type: DataTypes.STRING },
     status: { type: DataTypes.STRING, defaultValue: "not read" },
   },
