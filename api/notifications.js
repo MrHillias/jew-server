@@ -30,4 +30,27 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+// PUT-метод для обновления уведомления по ID
+router.put("/:id", async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body; // Предполагается, что эти поля могут быть обновлены
+
+  try {
+    const notification = await Notification.findByPk(id);
+    if (!notification) {
+      return res.status(404).json({ error: "Уведомление не найдено" });
+    }
+
+    // Обновление полей уведомления
+    await notification.update({
+      status: status || notification.status,
+    });
+
+    res.json({ message: "Уведомление успешно обновлено", notification });
+  } catch (error) {
+    console.error("Ошибка при обновлении уведомления:", error);
+    res.status(500).json({ error: "Ошибка сервера" });
+  }
+});
+
 module.exports = router;
