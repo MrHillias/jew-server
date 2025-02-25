@@ -30,9 +30,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Используем маршруты
-app.use("/", userRoutes);
-app.use("/", usersRoutes);
-app.use("/", exportRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/users", usersRoutes);
+app.use("/api/export", exportRoutes);
 app.use("/api/notifications", notificationsRouter);
 app.use("/api/dates", datesRouter);
 

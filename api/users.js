@@ -4,7 +4,7 @@ const User = require("../models");
 const router = express.Router();
 
 // API для получения всех строк по выбранным колонкам
-router.get("/users", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const users = await User.findAll({
       attributes: [
@@ -20,6 +20,7 @@ router.get("/users", async (req, res) => {
         "gender",
         "address",
         "religiousInfo",
+        "notes",
       ], // Указываем нужные поля
       order: [["id", "ASC"]], // Сортировка по id в порядке возрастания
     });

@@ -40,6 +40,7 @@ const User = sequelize.define(
         isInNeed: false,
       },
     },
+    notes: { type: DataTypes.TEXT, allowNull: true, defaultValue: "" },
   },
   {
     tableName: "users", // Явное указание имени таблицы

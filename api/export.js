@@ -6,7 +6,7 @@ const XLSX = require("xlsx");
 const router = express.Router();
 
 // API для скачивания бд по выбранным пользователям
-router.post("/export", async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const ids = req.body.ids; // Получаем массив id из тела запроса
 
@@ -115,7 +115,7 @@ router.post("/export", async (req, res) => {
 });
 
 // API для скачивания бд
-router.get("/export", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     // Использование Sequelize для получения только нужных данных
     const users = await User.findAll({

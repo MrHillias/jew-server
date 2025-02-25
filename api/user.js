@@ -7,7 +7,7 @@ const router = express.Router();
 const calculateAge = require("../ageCalculator");
 
 // API для занесения нового пользователя
-router.post("/user/reg", async (req, res) => {
+router.post("/reg", async (req, res) => {
   try {
     const {
       firstName,
@@ -52,7 +52,7 @@ router.post("/user/reg", async (req, res) => {
 });
 
 // API для получения инфы по отдельному пользователю
-router.get("/user/:id", async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
     const user = await User.findOne({
       where: { id: req.params.id },
@@ -69,6 +69,7 @@ router.get("/user/:id", async (req, res) => {
         "gender",
         "address",
         "religiousInfo",
+        "notes",
       ], // Указываем нужные поля
     });
     if (user) {
@@ -81,7 +82,7 @@ router.get("/user/:id", async (req, res) => {
 });
 
 // API для изменения инфы по отдельному пользователю
-router.put("/user/:id", async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
     const userId = req.params.id; // Получаем id из параметров URL
     const {
@@ -94,6 +95,7 @@ router.put("/user/:id", async (req, res) => {
       gender,
       address,
       religiousInfo,
+      notes,
     } = req.body; // Получаем данные для обновления из тела запроса
 
     // Найдите пользователя по id
@@ -120,6 +122,7 @@ router.put("/user/:id", async (req, res) => {
       gender: gender,
       address: address,
       religiousInfo: religiousInfo,
+      notes: notes,
     });
 
     // Отправьте обновленные данные пользователя в ответе
@@ -131,7 +134,7 @@ router.put("/user/:id", async (req, res) => {
 });
 
 // API для удаления пользователя
-router.delete("/user/:id", async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     const userId = req.params.id; // Получаем id из параметров URL
 
