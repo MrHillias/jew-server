@@ -56,4 +56,25 @@ router.get("/images/:fileName", async (req, res) => {
   }
 });
 
+// GET-метод для получения всех названий файлов пользователя
+router.get("/user/:userId/files", async (req, res) => {
+  const { userId } = req.params;
+  try {
+    // Извлечение всех записей из базы данных для указанного пользователя
+    const mediaFiles = await UserMedia.findAll({
+      where: { userId },
+      attributes: ["fileName"], // Извлечение только поля fileName
+    });
+
+    // Извлечение названий файлов из результатов
+    const fileNames = mediaFiles.map((media) => media.fileName);
+
+    // Отправка названий файлов в ответе
+    res.status(200).json({ files: fileNames });
+  } catch (error) {
+    console.error("Ошибка при получении файлов пользователя:", error);
+    res.status(500).json({ error: "Ошибка сервера" });
+  }
+});
+
 module.exports = router;
