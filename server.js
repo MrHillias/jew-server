@@ -39,8 +39,11 @@ app.use("/api/dates", datesRouter);
 //Основная дб
 const sequelize = require("./db");
 
-//Основная дб
+//дб уведоблений
 const sequelize_notifications = require("./db_notifications");
+
+//дб картинок
+const sequelize_media = require("./db_media");
 
 // Проверка соединения с БД
 sequelize
@@ -64,6 +67,18 @@ sequelize_notifications
 sequelize_notifications
   .sync()
   .then(() => console.log("Основные таблицы уведомлений синхронизированы"))
+  .catch((err) => console.error("Ошибка синхронизации:", err));
+
+// Проверка соединения с БД
+sequelize_media
+  .authenticate()
+  .then(() => console.log("Соединение с базой данных установлено"))
+  .catch((err) => console.error("Невозможно подключиться к базе данных:", err));
+
+// Синхронизация таблиц
+sequelize_media
+  .sync()
+  .then(() => console.log("Основные таблицы синхронизированы"))
   .catch((err) => console.error("Ошибка синхронизации:", err));
 
 // Используйте переменную HOST

@@ -47,4 +47,7 @@ const User = sequelize.define(
   }
 );
 
+User.hasMany(UserMedia, { foreignKey: "userId" });
+UserMedia.belongsTo(User, { foreignKey: "userId" });
+
 module.exports = User;
