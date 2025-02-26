@@ -12,7 +12,8 @@ router.post("/upload/:userId", upload.single("image"), async (req, res) => {
       return res.status(400).json({ error: "Файл не загружен" });
     }
 
-    // Сохранение информации о файле в базе данных
+    console.log("Файл загружен:", req.file.path);
+
     const media = await UserMedia.create({
       userId: userId,
       filePath: req.file.path,
