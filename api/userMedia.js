@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const upload = require("../upload"); // Импортируем конфигурацию multer
 const UserMedia = require("../models_media"); // Импорт модели UserMedia
 
