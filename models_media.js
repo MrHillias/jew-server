@@ -1,5 +1,5 @@
 const { Model, DataTypes } = require("sequelize");
-const sequelize = require("./database");
+const sequelize = require("./db_media");
 
 class UserMedia extends Model {}
 
