@@ -5,26 +5,33 @@ const { UserMedia } = require("../models_media"); // Импорт модели U
 const router = express.Router();
 
 // POST-метод для загрузки изображения
-router.post("/upload/:userId", upload.single("image"), async (req, res) => {
-  const { userId } = req.params;
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: "Файл не загружен" });
+router.post("/upload/:userId", (req, res) => {
+  upload.single("image")(req, res, async (err) => {
+    if (err) {
+      console.error("Ошибка загрузки файла:", err);
+      return res.status(400).json({ error: "Ошибка загрузки файла" });
     }
 
-    console.log("Файл загружен:", req.file.path);
+    const { userId } = req.params;
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "Файл не загружен" });
+      }
 
-    const media = await UserMedia.create({
-      userId: userId,
-      filePath: req.file.path,
-      fileName: req.file.filename,
-    });
+      console.log("Файл загружен:", req.file.path);
 
-    res.status(201).json({ message: "Файл успешно загружен", media });
-  } catch (error) {
-    console.error("Ошибка при загрузке файла:", error);
-    res.status(500).json({ error: "Ошибка сервера" });
-  }
+      const media = await UserMedia.create({
+        userId: userId,
+        filePath: req.file.path,
+        fileName: req.file.filename,
+      });
+
+      res.status(201).json({ message: "Файл успешно загружен", media });
+    } catch (error) {
+      console.error("Ошибка при сохранении в базу данных:", error);
+      res.status(500).json({ error: "Ошибка сервера" });
+    }
+  });
 });
 
 // GET-метод для получения изображения по имени файла
