@@ -1,5 +1,6 @@
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
 const upload = require("../upload"); // Импортируем конфигурацию multer
 const UserMedia = require("../models_media"); // Импорт модели UserMedia
 
@@ -73,6 +74,39 @@ router.get("/user/:userId/files", async (req, res) => {
     res.status(200).json({ files: fileNames });
   } catch (error) {
     console.error("Ошибка при получении файлов пользователя:", error);
+    res.status(500).json({ error: "Ошибка сервера" });
+  }
+});
+
+// DELETE-метод для удаления файла
+router.delete("/user/:userId/files/:fileName", async (req, res) => {
+  const { userId, fileName } = req.params;
+  try {
+    // Найдите запись в базе данных
+    const media = await UserMedia.findOne({
+      where: { userId, fileName },
+    });
+
+    if (!media) {
+      return res.status(404).json({ error: "Файл не найден" });
+    }
+
+    // Удалите файл из файловой системы
+    const filePath = path.resolve(__dirname, media.filePath);
+    fs.unlink(filePath, async (err) => {
+      if (err) {
+        console.error("Ошибка при удалении файла:", err);
+        return res.status(500).json({ error: "Ошибка при удалении файла" });
+      }
+
+      // Удалите запись из базы данных
+      await media.destroy();
+
+      // Подтвердите успешное удаление
+      res.status(200).json({ message: "Файл успешно удален" });
+    });
+  } catch (error) {
+    console.error("Ошибка при удалении файла:", error);
     res.status(500).json({ error: "Ошибка сервера" });
   }
 });
