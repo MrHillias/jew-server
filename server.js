@@ -12,7 +12,7 @@ const userRoutes = require("./api/user");
 const usersRoutes = require("./api/users");
 const notificationsRouter = require("./api/notifications");
 const datesRouter = require("./api/date");
-const mediaRouter = require("./api/media");
+const mediaRouter = require("./api/userMedia");
 
 // Настройка планировщика
 const setupScheduler = require("./scheduler");
