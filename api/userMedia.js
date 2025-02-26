@@ -43,8 +43,8 @@ router.get("/images/:fileName", async (req, res) => {
     if (!media) {
       return res.status(404).json({ error: "Файл не найден" });
     }
-    // Используем path.join для формирования пути
-    const filePath = path.join(__dirname, media.filePath);
+    // Используем path.resolve для формирования абсолютного пути
+    const filePath = path.resolve(rootDir, media.filePath);
 
     res.sendFile(filePath);
   } catch (error) {
