@@ -5,6 +5,9 @@ const UserMedia = require("../models_media"); // Импорт модели UserM
 
 const router = express.Router();
 
+// Определяем корневую директорию вашего проекта
+const rootDir = path.resolve(__dirname, ".."); // Поднимаемся на уровень выше, тк ваш файл находится в поддиректории
+
 // POST-метод для загрузки изображения
 router.post("/upload/:userId", (req, res) => {
   upload.single("image")(req, res, async (err) => {
