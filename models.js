@@ -1,5 +1,6 @@
 const sequelize = require("./db");
 const { Sequelize, DataTypes } = require("sequelize");
+const UserMedia = require("./models_media");
 
 const User = sequelize.define(
   "User",
