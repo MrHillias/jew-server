@@ -23,7 +23,7 @@ app.use(cors());
 
 // Настройка CORS
 const corsOptions = {
-  origin: "http://geula-list.ru",
+  origin: "http://geula-table.ru",
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   optionsSuccessStatus: 204,
 };
