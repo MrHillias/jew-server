@@ -1,12 +1,26 @@
 const express = require("express");
-const { User, UserRelation, RelationType } = require("../models");
 const { Op } = require("sequelize");
 const Hebcal = require("hebcal");
 
 const router = express.Router();
 
+// Используем ленивую загрузку моделей, чтобы избежать проблем с циклическими зависимостями
+let User, UserRelation, RelationType;
+
+// Инициализация моделей при первом использовании
+const initModels = () => {
+  if (!User) {
+    const associations = require("../associations");
+    User = associations.User;
+    UserRelation = associations.UserRelation;
+    RelationType = associations.RelationType;
+  }
+};
+
 // Инициализация типов родственных связей
 const initRelationTypes = async () => {
+  initModels();
+
   const types = [
     {
       type: "father",
@@ -144,12 +158,15 @@ const initRelationTypes = async () => {
   }
 };
 
-// Вызов инициализации при запуске
-initRelationTypes().catch(console.error);
+// Вызов инициализации при запуске (отложенный)
+setTimeout(() => {
+  initRelationTypes().catch(console.error);
+}, 1000);
 
 // GET - Получить все типы родственных связей
 router.get("/types", async (req, res) => {
   try {
+    initModels();
     const types = await RelationType.findAll({
       order: [["nameRu", "ASC"]],
     });
@@ -163,6 +180,7 @@ router.get("/types", async (req, res) => {
 // POST - Добавить родственную связь
 router.post("/", async (req, res) => {
   try {
+    initModels();
     const {
       userId,
       relatedUserId,
@@ -271,6 +289,7 @@ router.post("/", async (req, res) => {
 // GET - Получить все родственные связи пользователя
 router.get("/user/:userId", async (req, res) => {
   try {
+    initModels();
     const { userId } = req.params;
     const { includeDetails = true } = req.query;
 
@@ -308,6 +327,7 @@ router.get("/user/:userId", async (req, res) => {
 // GET - Получить семейное дерево пользователя
 router.get("/tree/:userId", async (req, res) => {
   try {
+    initModels();
     const { userId } = req.params;
     const { depth = 2 } = req.query; // Глубина дерева
 
@@ -398,6 +418,7 @@ router.get("/tree/:userId", async (req, res) => {
 // PUT - Обновить родственную связь
 router.put("/:id", async (req, res) => {
   try {
+    initModels();
     const { id } = req.params;
     const { relationType, relatedPersonInfo, notes } = req.body;
 
@@ -422,6 +443,7 @@ router.put("/:id", async (req, res) => {
 // DELETE - Удалить родственную связь
 router.delete("/:id", async (req, res) => {
   try {
+    initModels();
     const { id } = req.params;
     const { deleteReverse = true } = req.query;
 
@@ -457,6 +479,7 @@ router.delete("/:id", async (req, res) => {
 // POST - Поиск возможных родственников
 router.post("/search", async (req, res) => {
   try {
+    initModels();
     const { firstName, lastName, birthDate } = req.body;
 
     const where = {};
