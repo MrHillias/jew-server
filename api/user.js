@@ -84,7 +84,7 @@ router.get("/:id", async (req, res) => {
 // API для изменения инфы по отдельному пользователю
 router.put("/:id", async (req, res) => {
   try {
-    const userId = req.params.id; // Получаем id из параметров URL
+    const userId = req.params.id;
     const {
       firstName,
       lastName,
@@ -96,7 +96,7 @@ router.put("/:id", async (req, res) => {
       address,
       religiousInfo,
       notes,
-    } = req.body; // Получаем данные для обновления из тела запроса
+    } = req.body;
 
     // Найдите пользователя по id
     const user = await User.findByPk(userId);
@@ -105,25 +105,34 @@ router.put("/:id", async (req, res) => {
       return res.status(404).json({ error: "Пользователь не найден" });
     }
 
-    // Преобразование даты рождения в еврейскую дату
-    const date = new Date(birthDate);
-    const hebrewDate = new Hebcal.HDate(date);
-    const hebrewDateString = hebrewDate.toString(); // Преобразование в строку
+    // Подготовка данных для обновления
+    const updateData = {
+      firstName: firstName || user.firstName,
+      lastName: lastName || user.lastName,
+      fatherName: fatherName || user.fatherName,
+      mobileNumber: mobileNumber || user.mobileNumber,
+      email: email || user.email,
+      gender: gender || user.gender,
+      address: address || user.address,
+      religiousInfo: religiousInfo || user.religiousInfo,
+      notes: notes !== undefined ? notes : user.notes,
+    };
+
+    // Если изменилась дата рождения, пересчитываем возраст и еврейскую дату
+    if (birthDate && birthDate !== user.birthDate) {
+      updateData.birthDate = birthDate;
+
+      // Пересчет возраста
+      updateData.age = calculateAge(birthDate);
+
+      // Преобразование даты рождения в еврейскую дату
+      const date = new Date(birthDate);
+      const hebrewDate = new Hebcal.HDate(date);
+      updateData.hebrewDate = hebrewDate.toString();
+    }
 
     // Обновите данные пользователя
-    await user.update({
-      firstName: firstName,
-      lastName: lastName,
-      fatherName: fatherName,
-      birthDate: birthDate,
-      hebrewDate: hebrewDateString,
-      mobileNumber: mobileNumber,
-      email: email,
-      gender: gender,
-      address: address,
-      religiousInfo: religiousInfo,
-      notes: notes,
-    });
+    await user.update(updateData);
 
     // Отправьте обновленные данные пользователя в ответе
     res.json(user);

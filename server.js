@@ -13,6 +13,7 @@ const usersRoutes = require("./api/users");
 const notificationsRouter = require("./api/notifications");
 const datesRouter = require("./api/date");
 const mediaRouter = require("./api/userMedia");
+const relationsRouter = require("./api/relations");
 
 // Настройка планировщика
 const setupScheduler = require("./scheduler");
@@ -37,6 +38,7 @@ app.use("/api/export", exportRoutes);
 app.use("/api/notifications", notificationsRouter);
 app.use("/api/dates", datesRouter);
 app.use("/api/media", mediaRouter);
+app.use("/api/relations", relationsRouter);
 
 //Основная дб
 const sequelize = require("./db");
@@ -47,43 +49,206 @@ const sequelize_notifications = require("./db_notifications");
 //дб картинок
 const sequelize_media = require("./db_media");
 
-// Проверка соединения с БД
-sequelize
-  .authenticate()
-  .then(() => console.log("Соединение с базой данных установлено"))
-  .catch((err) => console.error("Невозможно подключиться к базе данных:", err));
+//дб родственников
+const { UserRelation, RelationType } = require("./models_relations");
 
-// Синхронизация таблиц
-sequelize
-  .sync()
-  .then(() => console.log("Основные таблицы синхронизированы"))
-  .catch((err) => console.error("Ошибка синхронизации:", err));
+// Функция для инициализации всех баз данных
+async function initializeDatabases() {
+  try {
+    // 1. Проверка соединения с основной БД
+    console.log("Проверка соединения с основной базой данных...");
+    await sequelize.authenticate();
+    console.log("✓ Соединение с основной базой данных установлено");
 
-// Проверка соединения с БД уведомлений
-sequelize_notifications
-  .authenticate()
-  .then(() => console.log("Соединение с базой данных уведомлений установлено"))
-  .catch((err) => console.error("Невозможно подключиться к базе данных:", err));
+    // 2. Проверка соединения с БД уведомлений
+    console.log("Проверка соединения с базой данных уведомлений...");
+    await sequelize_notifications.authenticate();
+    console.log("✓ Соединение с базой данных уведомлений установлено");
 
-// Синхронизация таблиц
-sequelize_notifications
-  .sync()
-  .then(() => console.log("Основные таблицы уведомлений синхронизированы"))
-  .catch((err) => console.error("Ошибка синхронизации:", err));
+    // 3. Проверка соединения с БД медиа
+    console.log("Проверка соединения с базой данных медиа...");
+    await sequelize_media.authenticate();
+    console.log("✓ Соединение с базой данных медиа установлено");
 
-// Проверка соединения с БД
-sequelize_media
-  .authenticate()
-  .then(() => console.log("Соединение с базой данных установлено"))
-  .catch((err) => console.error("Невозможно подключиться к базе данных:", err));
+    // 4. Синхронизация всех таблиц
+    console.log("\nНачало синхронизации таблиц...");
 
-// Синхронизация таблиц
-sequelize_media
-  .sync()
-  .then(() => console.log("Основные таблицы синхронизированы"))
-  .catch((err) => console.error("Ошибка синхронизации:", err));
+    // Синхронизация основных таблиц
+    await User.sync({ alter: true });
+    console.log("✓ Таблица users синхронизирована");
 
-// Используйте переменную HOST
+    // Синхронизация таблиц родственных связей
+    await RelationType.sync({ alter: true });
+    console.log("✓ Таблица relation_types синхронизирована");
+
+    await UserRelation.sync({ alter: true });
+    console.log("✓ Таблица user_relations синхронизирована");
+
+    // Синхронизация таблицы уведомлений
+    await Notifications.sync({ alter: true });
+    console.log("✓ Таблица notifications синхронизирована");
+
+    // Синхронизация таблицы медиа
+    await UserMedia.sync({ alter: true });
+    console.log("✓ Таблица UserMedia синхронизирована");
+
+    // 5. Инициализация справочных данных
+    console.log("\nИнициализация справочных данных...");
+    await initializeRelationTypes();
+
+    console.log("\nВсе базы данных успешно инициализированы!");
+  } catch (error) {
+    console.error("Ошибка при инициализации баз данных:", error);
+    process.exit(1); // Завершаем процесс при критической ошибке
+  }
+}
+
+// Функция инициализации типов родственных связей
+async function initializeRelationTypes() {
+  const types = [
+    {
+      type: "father",
+      nameRu: "Отец",
+      nameHe: "אבא",
+      reverseType: "child",
+      genderSpecific: true,
+    },
+    {
+      type: "mother",
+      nameRu: "Мать",
+      nameHe: "אמא",
+      reverseType: "child",
+      genderSpecific: true,
+    },
+    {
+      type: "son",
+      nameRu: "Сын",
+      nameHe: "בן",
+      reverseType: "parent",
+      genderSpecific: true,
+    },
+    {
+      type: "daughter",
+      nameRu: "Дочь",
+      nameHe: "בת",
+      reverseType: "parent",
+      genderSpecific: true,
+    },
+    {
+      type: "husband",
+      nameRu: "Муж",
+      nameHe: "בעל",
+      reverseType: "wife",
+      genderSpecific: true,
+    },
+    {
+      type: "wife",
+      nameRu: "Жена",
+      nameHe: "אישה",
+      reverseType: "husband",
+      genderSpecific: true,
+    },
+    {
+      type: "brother",
+      nameRu: "Брат",
+      nameHe: "אח",
+      reverseType: "sibling",
+      genderSpecific: true,
+    },
+    {
+      type: "sister",
+      nameRu: "Сестра",
+      nameHe: "אחות",
+      reverseType: "sibling",
+      genderSpecific: true,
+    },
+    {
+      type: "grandfather",
+      nameRu: "Дедушка",
+      nameHe: "סבא",
+      reverseType: "grandchild",
+      genderSpecific: true,
+    },
+    {
+      type: "grandmother",
+      nameRu: "Бабушка",
+      nameHe: "סבתא",
+      reverseType: "grandchild",
+      genderSpecific: true,
+    },
+    {
+      type: "grandson",
+      nameRu: "Внук",
+      nameHe: "נכד",
+      reverseType: "grandparent",
+      genderSpecific: true,
+    },
+    {
+      type: "granddaughter",
+      nameRu: "Внучка",
+      nameHe: "נכדה",
+      reverseType: "grandparent",
+      genderSpecific: true,
+    },
+    {
+      type: "uncle",
+      nameRu: "Дядя",
+      nameHe: "דוד",
+      reverseType: "nephew",
+      genderSpecific: true,
+    },
+    {
+      type: "aunt",
+      nameRu: "Тётя",
+      nameHe: "דודה",
+      reverseType: "niece",
+      genderSpecific: true,
+    },
+    {
+      type: "nephew",
+      nameRu: "Племянник",
+      nameHe: "אחיין",
+      reverseType: "uncle",
+      genderSpecific: true,
+    },
+    {
+      type: "niece",
+      nameRu: "Племянница",
+      nameHe: "אחיינית",
+      reverseType: "aunt",
+      genderSpecific: true,
+    },
+    {
+      type: "cousin_male",
+      nameRu: "Двоюродный брат",
+      nameHe: "בן דוד",
+      reverseType: "cousin",
+      genderSpecific: true,
+    },
+    {
+      type: "cousin_female",
+      nameRu: "Двоюродная сестра",
+      nameHe: "בת דודה",
+      reverseType: "cousin",
+      genderSpecific: true,
+    },
+  ];
+
+  let created = 0;
+  for (const type of types) {
+    const [relationTyТре, wasCreated] = await RelationType.findOrCreate({
+      where: { type: type.type },
+      defaults: type,
+    });
+    if (wasCreated) created++;
+  }
+
+  console.log(
+    `Типы родственных связей инициализированы (создано новых: ${created})`
+  );
+}
+
+// Используем переменную HOST
 const HOST = process.env.HOST || "0.0.0.0";
 
 //Фановые API, чтобы убедиться, что все раб отает

@@ -1,18 +1,36 @@
 const cron = require("node-cron");
-const { checkUpcomingBarMitzvahs } = require("./notificationService");
+const {
+  checkUpcomingBarMitzvahs,
+  checkUpcomingBirthdays,
+} = require("./notificationService");
 const { recalculateAges } = require("./ageService");
 
 // Функция для настройки планировщика
 function setupScheduler() {
-  // Планирование задачи
-  //0 — минута (0-я минута часа), 0 — час (0-й час дня, то есть полночь)
-  //* — день месяца (каждый день), * — месяц (каждый месяц)
-  //* — день недели (каждый день недели)
+  // Планирование ежедневной задачи в 00:01
   cron.schedule("1 0 * * *", () => {
-    console.log("Запуск проверки базы данных по бар-мицве");
+    console.log("Запуск ежедневных проверок...");
+
+    // Проверка бар/бат-мицв
+    console.log("Проверка предстоящих бар/бат-мицв...");
     checkUpcomingBarMitzvahs();
+
+    // Пересчет возрастов
+    console.log("Пересчет возрастов пользователей...");
     recalculateAges();
+
+    // Проверка дней рождения
+    console.log("Проверка предстоящих дней рождения...");
+    checkUpcomingBirthdays();
   });
+
+  // Дополнительная проверка дней рождения в 9:00 утра
+  cron.schedule("0 9 * * *", () => {
+    console.log("Утренняя проверка дней рождения...");
+    checkUpcomingBirthdays();
+  });
+
+  console.log("Планировщик задач настроен");
 }
 
 // Экспорт функции настройки планировщика

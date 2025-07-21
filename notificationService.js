@@ -1,7 +1,6 @@
-const User = require("./models");
+const { User } = require("./models");
 const Notifications = require("./models_notification");
 const Hebcal = require("hebcal");
-
 const { Op } = require("sequelize");
 
 async function checkUpcomingBarMitzvahs() {
@@ -95,4 +94,215 @@ async function checkUpcomingBarMitzvahs() {
   }
 }
 
-module.exports = { checkUpcomingBarMitzvahs };
+// Новая функция для проверки дней рождения
+async function checkUpcomingBirthdays() {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Проверяем дни рождения на сегодня, завтра и через неделю
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const nextWeek = new Date(today);
+    nextWeek.setDate(nextWeek.getDate() + 7);
+
+    const nextMonth = new Date(today);
+    nextMonth.setDate(nextMonth.getDate() + 30);
+
+    // Функция для получения даты без года
+    const getMonthDay = (date) => {
+      return `${(date.getMonth() + 1).toString().padStart(2, "0")}-${date
+        .getDate()
+        .toString()
+        .padStart(2, "0")}`;
+    };
+
+    // Проверка по григорианскому календарю
+    const todayMonthDay = getMonthDay(today);
+    const tomorrowMonthDay = getMonthDay(tomorrow);
+    const nextWeekMonthDay = getMonthDay(nextWeek);
+    const nextMonthMonthDay = getMonthDay(nextMonth);
+
+    // Находим всех пользователей с днями рождения
+    const allUsers = await User.findAll({
+      where: {
+        birthDate: {
+          [Op.not]: null,
+        },
+      },
+    });
+
+    for (const user of allUsers) {
+      const birthDate = new Date(user.birthDate);
+      const userMonthDay = getMonthDay(birthDate);
+
+      let notification = null;
+
+      // Проверяем совпадения дат
+      if (userMonthDay === todayMonthDay) {
+        // День рождения сегодня
+        const age = today.getFullYear() - birthDate.getFullYear();
+        notification = {
+          userId: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          message: `Сегодня день рождения! Исполняется ${age} лет`,
+          type: "birthday-today",
+          status: "unread",
+        };
+      } else if (userMonthDay === tomorrowMonthDay) {
+        // День рождения завтра
+        const age = today.getFullYear() - birthDate.getFullYear() + 1;
+        notification = {
+          userId: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          message: `День рождения завтра! Исполнится ${age} лет`,
+          type: "birthday-tomorrow",
+          status: "unread",
+        };
+      } else if (userMonthDay === nextWeekMonthDay) {
+        // День рождения через неделю
+        const age = today.getFullYear() - birthDate.getFullYear();
+        if (
+          nextWeek.getMonth() < birthDate.getMonth() ||
+          (nextWeek.getMonth() === birthDate.getMonth() &&
+            nextWeek.getDate() < birthDate.getDate())
+        ) {
+          age++;
+        }
+        notification = {
+          userId: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          message: `День рождения через неделю! Исполнится ${age} лет`,
+          type: "birthday-week",
+          status: "unread",
+        };
+      } else if (userMonthDay === nextMonthMonthDay) {
+        // День рождения через месяц
+        const age = today.getFullYear() - birthDate.getFullYear();
+        if (
+          nextMonth.getMonth() < birthDate.getMonth() ||
+          (nextMonth.getMonth() === birthDate.getMonth() &&
+            nextMonth.getDate() < birthDate.getDate())
+        ) {
+          age++;
+        }
+        notification = {
+          userId: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          message: `День рождения через месяц! Исполнится ${age} лет`,
+          type: "birthday-month",
+          status: "unread",
+        };
+      }
+
+      // Создаем уведомление, если оно не существует
+      if (notification) {
+        // Проверяем, не создано ли уже такое уведомление сегодня
+        const existingNotification = await Notifications.findOne({
+          where: {
+            userId: notification.userId,
+            type: notification.type,
+            createdAt: {
+              [Op.gte]: today,
+            },
+          },
+        });
+
+        if (!existingNotification) {
+          await Notifications.create(notification);
+          console.log(
+            `Создано уведомление о дне рождения для ${user.firstName} ${user.lastName}`
+          );
+        }
+      }
+    }
+
+    // Проверка дней рождения по еврейскому календарю
+    const hebrewToday = new Hebcal.HDate(today);
+    const hebrewTomorrow = new Hebcal.HDate(tomorrow);
+    const hebrewNextWeek = new Hebcal.HDate(nextWeek);
+
+    for (const user of allUsers) {
+      if (user.hebrewDate) {
+        let hebrewNotification = null;
+
+        // Извлекаем месяц и день из еврейской даты
+        const userHebrewParts = user.hebrewDate.split(" ");
+        const todayHebrewParts = hebrewToday.toString().split(" ");
+        const tomorrowHebrewParts = hebrewTomorrow.toString().split(" ");
+        const nextWeekHebrewParts = hebrewNextWeek.toString().split(" ");
+
+        if (
+          userHebrewParts[0] === todayHebrewParts[0] &&
+          userHebrewParts[1] === todayHebrewParts[1]
+        ) {
+          // Еврейский день рождения сегодня
+          hebrewNotification = {
+            userId: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            message: `Сегодня еврейский день рождения! (${user.hebrewDate})`,
+            type: "hebrew-birthday-today",
+            status: "unread",
+          };
+        } else if (
+          userHebrewParts[0] === tomorrowHebrewParts[0] &&
+          userHebrewParts[1] === tomorrowHebrewParts[1]
+        ) {
+          // Еврейский день рождения завтра
+          hebrewNotification = {
+            userId: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            message: `Завтра еврейский день рождения! (${user.hebrewDate})`,
+            type: "hebrew-birthday-tomorrow",
+            status: "unread",
+          };
+        } else if (
+          userHebrewParts[0] === nextWeekHebrewParts[0] &&
+          userHebrewParts[1] === nextWeekHebrewParts[1]
+        ) {
+          // Еврейский день рождения через неделю
+          hebrewNotification = {
+            userId: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            message: `Через неделю еврейский день рождения! (${user.hebrewDate})`,
+            type: "hebrew-birthday-week",
+            status: "unread",
+          };
+        }
+
+        if (hebrewNotification) {
+          const existingHebrewNotification = await Notifications.findOne({
+            where: {
+              userId: hebrewNotification.userId,
+              type: hebrewNotification.type,
+              createdAt: {
+                [Op.gte]: today,
+              },
+            },
+          });
+
+          if (!existingHebrewNotification) {
+            await Notifications.create(hebrewNotification);
+            console.log(
+              `Создано уведомление о еврейском дне рождения для ${user.firstName} ${user.lastName}`
+            );
+          }
+        }
+      }
+    }
+
+    console.log("Проверка дней рождения завершена");
+  } catch (error) {
+    console.error("Ошибка при проверке дней рождения:", error);
+  }
+}
+
+module.exports = { checkUpcomingBarMitzvahs, checkUpcomingBirthdays };

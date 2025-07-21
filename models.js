@@ -1,54 +1,53 @@
-const sequelize = require("./db");
-const { Sequelize, DataTypes } = require("sequelize");
-const UserMedia = require("./models_media");
+// В конец файла models.js добавьте:
 
-const User = sequelize.define(
-  "User",
-  {
-    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    firstName: { type: DataTypes.STRING, allowNull: true },
-    lastName: { type: DataTypes.STRING, allowNull: true },
-    fatherName: { type: DataTypes.STRING, allowNull: true },
-    birthDate: { type: DataTypes.DATE, allowNull: true },
-    hebrewDate: { type: DataTypes.STRING, allowNull: true },
-    age: { type: DataTypes.INTEGER, allowNull: true, defaultValue: 0 },
-    mobileNumber: { type: DataTypes.INTEGER, allowNull: true, defaultValue: 0 },
-    email: { type: DataTypes.STRING, allowNull: true },
-    gender: { type: DataTypes.STRING, allowNull: true },
-    address: {
-      type: DataTypes.JSON,
-      allowNull: true,
-      defaultValue: {
-        city: null,
-        street: null,
-        houseNumber: null,
-        building: null,
-        apartment: null,
-        metroStation: null,
-      },
-    },
-    religiousInfo: {
-      type: DataTypes.JSON,
-      allowNull: true,
-      defaultValue: {
-        keepsSabbath: false,
-        keepsKosher: false,
-        hasTT: false,
-        seminarParticipant: false,
-        hasCommunityBooks: false,
-        childrenCamp: false,
-        passover: false,
-        isInNeed: false,
-      },
-    },
-    notes: { type: DataTypes.TEXT, allowNull: true, defaultValue: "" },
-  },
-  {
-    tableName: "users", // Явное указание имени таблицы
+const { UserRelation, RelationType } = require("./models_relations");
+
+// Определение связей
+User.hasMany(UserRelation, {
+  foreignKey: "userId",
+  as: "relations",
+});
+
+User.hasMany(UserRelation, {
+  foreignKey: "relatedUserId",
+  as: "relatedTo",
+});
+
+UserRelation.belongsTo(User, {
+  foreignKey: "userId",
+  as: "user",
+});
+
+UserRelation.belongsTo(User, {
+  foreignKey: "relatedUserId",
+  as: "relatedUser",
+});
+
+// Хуки для автоматического обновления возраста и еврейской даты
+User.beforeSave(async (user, options) => {
+  // Если дата рождения изменилась или это новый пользователь
+  if (user.changed("birthDate") && user.birthDate) {
+    // Пересчитываем возраст
+    user.age = calculateAge(user.birthDate);
+
+    // Пересчитываем еврейскую дату
+    const date = new Date(user.birthDate);
+    const hebrewDate = new Hebcal.HDate(date);
+    user.hebrewDate = hebrewDate.toString();
   }
-);
+});
 
-User.hasMany(UserMedia, { foreignKey: "userId" });
-UserMedia.belongsTo(User, { foreignKey: "userId" });
+// Хук для пересчета возраста при массовом обновлении
+User.beforeBulkUpdate(async (options) => {
+  if (options.attributes.birthDate) {
+    // Пересчитываем возраст
+    options.attributes.age = calculateAge(options.attributes.birthDate);
 
-module.exports = { User, UserMedia };
+    // Пересчитываем еврейскую дату
+    const date = new Date(options.attributes.birthDate);
+    const hebrewDate = new Hebcal.HDate(date);
+    options.attributes.hebrewDate = hebrewDate.toString();
+  }
+});
+
+module.exports = { User, UserMedia, UserRelation, RelationType };
