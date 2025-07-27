@@ -183,8 +183,24 @@ router.post("/reg", async (req, res) => {
     // Если все прошло успешно, подтверждаем транзакцию
     await transaction.commit();
 
-    // Загружаем созданные связи с деталями
-    const userWithRelations = await User.findByPk(userInfo.id, {
+    const completeUser = await User.findByPk(userInfo.id, {
+      attributes: [
+        "id",
+        "firstName",
+        "lastName",
+        "fatherName",
+        "birthDate",
+        "hebrewDate",
+        "age",
+        "mobileNumber",
+        "email",
+        "gender",
+        "address",
+        "religiousInfo",
+        "notes",
+        "createdAt",
+        "updatedAt",
+      ],
       include: [
         {
           model: UserRelation,
@@ -193,7 +209,14 @@ router.post("/reg", async (req, res) => {
             {
               model: User,
               as: "relatedUser",
-              attributes: ["id", "firstName", "lastName", "gender"],
+              attributes: [
+                "id",
+                "firstName",
+                "lastName",
+                "gender",
+                "birthDate",
+                "age",
+              ],
             },
           ],
         },
@@ -202,9 +225,12 @@ router.post("/reg", async (req, res) => {
 
     console.log("Пользователь успешно добавлен с родственными связями");
 
+    const userResponse = completeUser.toJSON();
+    delete userResponse.relations; // Убираем вложенные связи из основного объекта
+
     return res.status(201).json({
-      user: userInfo,
-      relations: userWithRelations.relations,
+      ...userResponse,
+      relations: completeUser.relations || [],
     });
   } catch (error) {
     // Откатываем транзакцию в случае ошибки
