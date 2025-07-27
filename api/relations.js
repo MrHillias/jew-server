@@ -2,6 +2,7 @@ const express = require("express");
 const { Op } = require("sequelize");
 const Hebcal = require("hebcal");
 
+const sequelize = require("../db");
 const router = express.Router();
 
 // Используем ленивую загрузку моделей, чтобы избежать проблем с циклическими зависимостями
