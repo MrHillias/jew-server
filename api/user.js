@@ -200,8 +200,6 @@ router.post("/reg", async (req, res) => {
       ],
     });
 
-    await User.save();
-
     console.log("Пользователь успешно добавлен с родственными связями");
     return res.status(201).json({
       user: userInfo,
