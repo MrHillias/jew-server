@@ -222,60 +222,63 @@ router.post("/", async (req, res) => {
       });
 
       if (typeInfo && typeInfo.reverseType) {
-        // Определяем тип обратной связи с учетом пола
-        let reverseType = typeInfo.reverseType;
+        // Получаем информацию о связанном пользователе для определения его пола
+        const relatedUser = await User.findByPk(relatedUserId);
 
-        // Если тип зависит от пола, корректируем его
-        if (typeInfo.genderSpecific && typeInfo.reverseType === "child") {
-          const userGender = user.gender;
-          reverseType = userGender === "М" ? "son" : "daughter";
-        } else if (
-          typeInfo.genderSpecific &&
-          typeInfo.reverseType === "parent"
-        ) {
-          const userGender = user.gender;
-          reverseType = userGender === "М" ? "father" : "mother";
-        } else if (
-          typeInfo.genderSpecific &&
-          typeInfo.reverseType === "sibling"
-        ) {
-          const userGender = user.gender;
-          reverseType = userGender === "М" ? "brother" : "sister";
-        } else if (
-          typeInfo.genderSpecific &&
-          typeInfo.reverseType === "grandchild"
-        ) {
-          const userGender = user.gender;
-          reverseType = userGender === "М" ? "grandson" : "granddaughter";
-        } else if (
-          typeInfo.genderSpecific &&
-          typeInfo.reverseType === "grandparent"
-        ) {
-          const userGender = user.gender;
-          reverseType = userGender === "М" ? "grandfather" : "grandmother";
-        } else if (
-          typeInfo.reverseType === "nephew" ||
-          typeInfo.reverseType === "niece"
-        ) {
-          const userGender = user.gender;
-          reverseType = userGender === "М" ? "uncle" : "aunt";
-        } else if (
-          typeInfo.reverseType === "uncle" ||
-          typeInfo.reverseType === "aunt"
-        ) {
-          const userGender = user.gender;
-          reverseType = userGender === "М" ? "nephew" : "niece";
-        } else if (typeInfo.reverseType === "cousin") {
-          const userGender = user.gender;
-          reverseType = userGender === "М" ? "cousin_male" : "cousin_female";
+        if (!relatedUser) {
+          console.error(`Связанный пользователь ${relatedUserId} не найден`);
+        } else {
+          // Определяем тип обратной связи с учетом пола СВЯЗАННОГО пользователя
+          let reverseType = typeInfo.reverseType;
+
+          // Если тип зависит от пола, корректируем его на основе пола СВЯЗАННОГО пользователя
+          if (typeInfo.genderSpecific) {
+            const relatedUserGender = relatedUser.gender;
+
+            switch (typeInfo.reverseType) {
+              case "child":
+                reverseType = relatedUserGender === "М" ? "son" : "daughter";
+                break;
+              case "parent":
+                reverseType = relatedUserGender === "М" ? "father" : "mother";
+                break;
+              case "sibling":
+                reverseType = relatedUserGender === "М" ? "brother" : "sister";
+                break;
+              case "grandchild":
+                reverseType =
+                  relatedUserGender === "М" ? "grandson" : "granddaughter";
+                break;
+              case "grandparent":
+                reverseType =
+                  relatedUserGender === "М" ? "grandfather" : "grandmother";
+                break;
+              case "nephew":
+              case "niece":
+                reverseType = relatedUserGender === "М" ? "uncle" : "aunt";
+                break;
+              case "uncle":
+              case "aunt":
+                reverseType = relatedUserGender === "М" ? "nephew" : "niece";
+                break;
+              case "cousin":
+                reverseType =
+                  relatedUserGender === "М" ? "cousin_male" : "cousin_female";
+                break;
+            }
+          }
+
+          await UserRelation.create({
+            userId: relatedUserId,
+            relatedUserId: userId,
+            relationType: reverseType,
+            notes: `Автоматически создано как обратная связь`,
+          });
+
+          console.log(
+            `Создана обратная связь: пользователь ${relatedUserId} теперь имеет связь '${reverseType}' с пользователем ${userId}`
+          );
         }
-
-        await UserRelation.create({
-          userId: relatedUserId,
-          relatedUserId: userId,
-          relationType: reverseType,
-          notes: `Автоматически создано как обратная связь`,
-        });
       }
     }
 

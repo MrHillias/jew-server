@@ -9,7 +9,7 @@ const router = express.Router();
 const calculateAge = require("../ageCalculator");
 
 // Функция для определения обратного типа связи с учетом пола
-async function getReverseRelationType(relationType, userGender) {
+async function getReverseRelationType(relationType, relatedUserGender) {
   const typeInfo = await RelationType.findOne({
     where: { type: relationType },
   });
@@ -20,34 +20,35 @@ async function getReverseRelationType(relationType, userGender) {
 
   let reverseType = typeInfo.reverseType;
 
-  // Корректируем тип в зависимости от пола
+  // Корректируем тип в зависимости от пола СВЯЗАННОГО пользователя
   if (typeInfo.genderSpecific) {
     switch (typeInfo.reverseType) {
       case "child":
-        reverseType = userGender === "М" ? "son" : "daughter";
+        reverseType = relatedUserGender === "М" ? "son" : "daughter";
         break;
       case "parent":
-        reverseType = userGender === "М" ? "father" : "mother";
+        reverseType = relatedUserGender === "М" ? "father" : "mother";
         break;
       case "sibling":
-        reverseType = userGender === "М" ? "brother" : "sister";
+        reverseType = relatedUserGender === "М" ? "brother" : "sister";
         break;
       case "grandchild":
-        reverseType = userGender === "М" ? "grandson" : "granddaughter";
+        reverseType = relatedUserGender === "М" ? "grandson" : "granddaughter";
         break;
       case "grandparent":
-        reverseType = userGender === "М" ? "grandfather" : "grandmother";
+        reverseType = relatedUserGender === "М" ? "grandfather" : "grandmother";
         break;
       case "nephew":
       case "niece":
-        reverseType = userGender === "М" ? "uncle" : "aunt";
+        reverseType = relatedUserGender === "М" ? "uncle" : "aunt";
         break;
       case "uncle":
       case "aunt":
-        reverseType = userGender === "М" ? "nephew" : "niece";
+        reverseType = relatedUserGender === "М" ? "nephew" : "niece";
         break;
       case "cousin":
-        reverseType = userGender === "М" ? "cousin_male" : "cousin_female";
+        reverseType =
+          relatedUserGender === "М" ? "cousin_male" : "cousin_female";
         break;
     }
   }
@@ -142,25 +143,32 @@ router.post("/reg", async (req, res) => {
 
         // Если это связь с существующим пользователем и нужна обратная связь
         if (relatedUserId && createReverse) {
-          const reverseType = await getReverseRelationType(
-            relationType,
-            userInfo.gender
-          );
+          // Получаем информацию о связанном пользователе
+          const relatedUser = await User.findByPk(relatedUserId, {
+            transaction,
+          });
 
-          if (reverseType) {
-            const reverseRelation = await UserRelation.create(
-              {
-                userId: relatedUserId,
-                relatedUserId: userInfo.id,
-                relationType: reverseType,
-                notes: `Автоматически создано при регистрации ${userInfo.firstName} ${userInfo.lastName}`,
-              },
-              { transaction }
+          if (relatedUser) {
+            const reverseType = await getReverseRelationType(
+              relationType,
+              relatedUser.gender
             );
 
-            console.log(
-              `Создана обратная связь: ${reverseType} для пользователя ${relatedUserId}`
-            );
+            if (reverseType) {
+              const reverseRelation = await UserRelation.create(
+                {
+                  userId: relatedUserId,
+                  relatedUserId: userInfo.id,
+                  relationType: reverseType,
+                  notes: `Автоматически создано при регистрации ${userInfo.firstName} ${userInfo.lastName}`,
+                },
+                { transaction }
+              );
+
+              console.log(
+                `Создана обратная связь: ${reverseType} для пользователя ${relatedUserId}`
+              );
+            }
           }
         }
       } catch (relationError) {
