@@ -320,24 +320,76 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// API для удаления пользователя
+// API для удаления пользователя с сохранением родственных связей
 router.delete("/:id", async (req, res) => {
+  const transaction = await sequelize.transaction();
+
   try {
     const userId = req.params.id;
 
     // Найдите пользователя по id
-    const user = await User.findByPk(userId);
+    const user = await User.findByPk(userId, {
+      include: [
+        {
+          model: UserRelation,
+          as: "relations",
+        },
+      ],
+    });
 
     if (!user) {
+      await transaction.rollback();
       return res.status(404).json({ error: "Пользователь не найден" });
     }
 
-    // Удалите пользователя (связи удалятся автоматически благодаря CASCADE)
-    await user.destroy();
+    // Сохраняем информацию о пользователе для родственных связей
+    const userInfo = {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      fatherName: user.fatherName,
+      birthDate: user.birthDate,
+      hebrewDate: user.hebrewDate,
+      gender: user.gender,
+      mobileNumber: user.mobileNumber,
+      email: user.email,
+      isDeceased: false, // Можно добавить параметр в запрос
+      notes: `Удален из базы ${new Date().toISOString()}`,
+    };
 
-    // Отправьте подтверждение удаления
-    res.json({ message: "Пользователь успешно удален" });
+    // Обновляем все связи, где этот пользователь указан как relatedUserId
+    const relationsToUpdate = await UserRelation.findAll({
+      where: { relatedUserId: userId },
+      transaction,
+    });
+
+    console.log(`Найдено ${relationsToUpdate.length} связей для обновления`);
+
+    for (const relation of relationsToUpdate) {
+      await relation.update(
+        {
+          relatedUserId: null,
+          relatedPersonInfo: userInfo,
+        },
+        { transaction }
+      );
+
+      console.log(
+        `Обновлена связь ${relation.id}: пользователь ${relation.userId} теперь имеет внешнюю связь`
+      );
+    }
+
+    // Удаляем пользователя (его собственные связи удалятся автоматически)
+    await user.destroy({ transaction });
+
+    await transaction.commit();
+
+    res.json({
+      message: "Пользователь успешно удален",
+      updatedRelations: relationsToUpdate.length,
+      preservedUserInfo: userInfo,
+    });
   } catch (error) {
+    await transaction.rollback();
     console.error("Ошибка при удалении пользователя:", error);
     res.status(500).json({ error: "Ошибка при удалении пользователя" });
   }
