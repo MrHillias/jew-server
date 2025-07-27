@@ -94,16 +94,16 @@ router.post("/reg", async (req, res) => {
     const userInfo = await User.create(
       {
         firstName: firstName,
-        lastName: lastName,
-        fatherName: fatherName,
+        lastName: lastName || null,
+        fatherName: fatherName || null,
         birthDate: birthDate || null,
         hebrewDate: hebrewDateString || null,
-        age: age,
-        mobileNumber: mobileNumber,
-        email: email,
-        gender: gender,
-        address: address,
-        religiousInfo: religiousInfo,
+        age: age || null,
+        mobileNumber: mobileNumber || null,
+        email: email || null,
+        gender: gender || null,
+        address: address || null,
+        religiousInfo: religiousInfo || null,
       },
       { transaction }
     );
