@@ -1,5 +1,8 @@
 const express = require("express");
 const Notifications = require("../models_notification");
+const { User } = require("../associations"); // Эта строка критически важна!
+const { Op } = require("sequelize");
+const sequelize = require("../db_notifications");
 
 const router = express.Router();
 
